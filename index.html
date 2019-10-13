@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      IndexedDB入门
+    </title>
+  </head>
+  <body>
+    <div>
+      <button onclick="createDateBase()">新建数据库和表</button>
+      <button onclick="createRecord()">新建记录</button>
+      <button onclick="updateRecord()">修改记录(id=1的张三名称改为李四)</button>
+      <button onclick="deleteRecord()">删除记录(id=1)</button>
+      <button onclick="queryRecordAll()">查询全部记录</button>
+      <button onclick="queryRecord()">查询记录(id=1)</button>
+      <button onclick="queryRecordByIndex()">根据索引查询(name 张三2)</button>
+    </div>
+    <div id='content'>
+      <p id='dateBase'></p>
+      <p id='table'></p>
+      <p id='record'></p>
+      <table id="myTable" border="0" cellpadding="0" cellspacing="0"></table>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var db;
+    var request;
+    var objectStore;
+    var cursor = 1;
+    // 新建数据库 gmm
+    function createDateBase () {
+      window.indexedDB.deleteDatabase('gmm');
+      request = window.indexedDB.open('gmm', 1);
+      request.onsuccess = function (event) {
+        document.getElementById('dateBase').innerHTML = '数据库名称：gmm';
+      }
+      // 新建表 zx
+      // id    name   age    email
+      request.onupgradeneeded = function (event) {
+        db = event.target.result;
+        var objectStore;
+        if (!db.objectStoreNames.contains('zx')) {
+          objectStore = db.createObjectStore('zx', { keyPath: 'id' });
+          document.getElementById('table').innerHTML = '表名称：zx';
+          // 插入索引 name email
+          objectStore.createIndex('name', 'name', { unique: false });
+          objectStore.createIndex('email', 'email', { unique: false });
+        }
+      }
+    }
+    // 新建记录 add
+    function createRecord () {
+      objectStore = db.transaction(['zx'], 'readwrite').objectStore('zx');
+      let record = objectStore.add({ id: cursor, name: '张三' + cursor, age: 24, email: '456@qq.com' });
+      record.onsuccess = function (event) {
+        document.getElementById('record').innerHTML = `数据${cursor}写入成功!`;
+        queryRecordAll()
+      }
+      record.onerror = function (event) {
+        document.getElementById('record').innerHTML = '数据写入失败!';
+      }
+    }
+    // 修改记录 put
+    function updateRecord () {
+      objectStore = db.transaction(['zx'], 'readwrite').objectStore('zx');
+      let record = objectStore.put({ id: 1, name: '李四', age: 24, email: '456@qq.com' });
+      record.onsuccess = function (event) {
+        document.getElementById('record').innerHTML = '数据更新成功!';
+        queryRecordAll()
+      }
+      record.onerror = function (event) {
+        document.getElementById('record').innerHTML = '数据更新失败!';
+      }
+    }
+    // 删除记录 delete
+    function deleteRecord () {
+      objectStore = db.transaction(['zx'], 'readwrite').objectStore('zx');
+      let record = objectStore.delete(1);
+      record.onsuccess = function (event) {
+        document.getElementById('record').innerHTML = '数据删除成功!';
+        queryRecordAll()
+      }
+      record.onerror = function (event) {
+        document.getElementById('record').innerHTML = '数据删除失败!';
+      }
+    }
+    // 查询记录
+    function queryRecord () {
+      let table = db.transaction(['zx']).objectStore('zx');
+      let records = table.get(1);
+      records.onsuccess = function (event) {
+        if (records.result) {
+          addTable(['id', 'name', 'age', 'email'], records.result)
+        } else {
+          document.getElementById('record').innerHTML = '未获取数据!';
+          addTable(['id', 'name', 'age', 'email'], [])
+        }
+      }
+      records.onerror = function (event) {
+        document.getElementById('record').innerHTML = '查询记录失败!';
+      }
+    }
+    // 查询全部
+    function queryRecordAll () {
+      let table = db.transaction(['zx']).objectStore('zx');
+      let list = [];
+      table.openCursor().onsuccess = function (event) {
+        let s = event.target.result
+        if (s) {
+          list.push(s.value);
+          s.continue();
+        } else {
+          cursor = list.length + 1;
+          if (list.length > 0) {
+            addTable(['id', 'name', 'age', 'email'], list);
+          }
+        }
+      }
+    }
+    // 根据索引查找
+    function queryRecordByIndex () {
+      let table = db.transaction(['zx']).objectStore('zx');
+      let index = table.index('name');
+      let record = index.get('张三2');
+      record.onsuccess = function (event) {
+        if (event.target.result) {
+          addTable(['id', 'name', 'age', 'email'], event.target.result)
+        } else {
+          document.getElementById('record').innerHTML = '未获取数据!';
+          addTable(['id', 'name', 'age', 'email'], [])
+        }
+      }
+      record.onerror = function (event) {
+        document.getElementById('record').innerHTML = '索引查询记录失败!';
+      }
+    }
+    // 动态生成表格
+    function addTable (head, body) {
+      let table = document.getElementById('myTable');
+      if (document.getElementById('thead')) {
+        table.removeChild(document.getElementById('thead'))
+      }
+      if (document.getElementById('tbody')) {
+        table.removeChild(document.getElementById('tbody'))
+      }
+      if (JSON.stringify(body) === '[]') {
+        return
+      }
+      let thead = document.createElement('thead');
+      let tbody = document.createElement('tbody');
+      thead.id = 'thead';
+      tbody.id = 'tbody';
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      let tr = document.createElement('tr');
+      for (let i of head) {
+        let td = document.createElement('td');
+        td.innerHTML = i;
+        tr.appendChild(td);
+      }
+      thead.appendChild(tr);
+      if (!Array.isArray(body)) {
+        let tr = document.createElement('tr');
+        for (let i of head) {
+          let td = document.createElement('td');
+          td.innerHTML = body[i];
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      } else {
+        for (let j of body) {
+          let tr = document.createElement('tr');
+          for (let i of head) {
+            let td = document.createElement('td');
+            td.innerHTML = j[i];
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+      }
+      document.getElementById('content').appendChild(table);
+    }
+  </script>
+  <style>
+    table {
+      border-top: 1px solid #c3bebe;
+      border-left: 1px solid #c3bebe;
+    }
+    td {
+      border-right: 1px solid #c3bebe;
+      border-bottom: 1px solid #c3bebe;
+      width: 60px;
+    }
+  </style>
+</html>
