@@ -19,7 +19,7 @@ request.onupgradeneeded = function(event) {
   db = event.target.result;
   var table;
   if (!db.objectStoreNames.contains('数据仓库名称')) {
-  table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
+    table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
   }
 }
 ```  
@@ -29,7 +29,7 @@ request.onupgradeneeded = function(event) {
   db = event.target.result;
   var table;
   if (!db.objectStoreNames.contains('数据仓库名称')) {
-  table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
+    table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
   }
   table.createIndex('name', 'name', { unique: false });
   table.createIndex('email', 'email', { unique: true });
@@ -41,10 +41,10 @@ request.onupgradeneeded = function(event) {
 let table = db.transaction(['数据仓库名称'], 'readwrite').objectStore('数据仓库名称')
 let record = table.add({ id: 1, name: '张三', age: 24, email: 'zhangsan@example.com' });
 record.onsuccess = function (event) {
-console.log('数据写入成功');
+  console.log('数据写入成功');
 };
 record.onerror = function (event) {
-console.log('数据写入失败');
+  console.log('数据写入失败');
 };
 ```
 
@@ -53,10 +53,10 @@ console.log('数据写入失败');
 let table = db.transaction(['数据仓库名称'], 'readwrite').objectStore('数据仓库名称')
 let record = table.put({ id: 1, name: '李四', age: 24, email: 'zhangsan@example.com' });
 record.onsuccess = function (event) {
-console.log('数据更新成功');
+  console.log('数据更新成功');
 };
 record.onerror = function (event) {
-console.log('数据更新失败');
+  console.log('数据更新失败');
 };
 ```
 
@@ -65,10 +65,10 @@ console.log('数据更新失败');
 let table = db.transaction(['数据仓库名称'], 'readwrite').objectStore('数据仓库名称')
 let record = table.delete(1);
 record.onsuccess = function (event) {
-console.log('数据删除成功');
+  console.log('数据删除成功');
 };
 record.onerror = function (event) {
-console.log('数据删除失败');
+  console.log('数据删除失败');
 };
 ``` 
   
@@ -81,9 +81,9 @@ let record = objectStore.get(1); // 获取主键 = 1的值
 record.onsuccess = function( event) {
   let result = request.result
   if (result) {
-  ...
+    ...
   } else {
-  console.log('未获得数据记录');
+    console.log('未获得数据记录');
   }
 };
 record.onerror = function(event) {
@@ -97,7 +97,7 @@ let record = table.index('name').get('李四'); // 根据索引获取name = 李�
 record.onsuccess = function (event) {
   let result = event.target.result;
   if (result) {
-  ...
+    ...
   }
 };
 ```
