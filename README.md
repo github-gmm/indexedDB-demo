@@ -1,7 +1,7 @@
 # indexedDB-demo
 浏览器数据库indexedDB，实现了增删查改功能
 
-1、**打开数据库**：  
+1、**打开数据库**：每次版本号不一样就会新建数据库  
 ```js
 var request = window.indexedDB.open('数据库名称', 版本号);
 ```
