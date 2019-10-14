@@ -17,7 +17,7 @@ request.onupgradeneeded = function(event) {
 ```js
 request.onupgradeneeded = function(event) {
   db = event.target.result;
-  var table;
+  let table;
   if (!db.objectStoreNames.contains('数据仓库名称')) {
     table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
   }
@@ -27,7 +27,7 @@ request.onupgradeneeded = function(event) {
 ```js
 request.onupgradeneeded = function(event) {
   db = event.target.result;
-  var table;
+  let table;
   if (!db.objectStoreNames.contains('数据仓库名称')) {
     table = db.createObjectStore('数据仓库名称', { keyPath: 'id' });
   }
